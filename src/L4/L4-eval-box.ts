@@ -73,11 +73,6 @@ return makeFailure("id dont exist")
 // lambda (b ) + b c
 
 // HW3 use these functions
-const printPreTrace = (name: string, vals: Value[], counter: number): void =>
-    console.log(`>${" >".repeat(counter)} (${name} ${map(valueToString, vals)})`)
-
-const printPostTrace = (val: Value, counter: number): void =>
-    console.log(`<${" <".repeat(counter)} ${val}`)
 
 
 const evalIf = (exp: IfExp, env: Env): Result<Value> =>
@@ -101,14 +96,22 @@ const applyClosure = (proc: Closure, args: Value[]): Result<Value> => {
     return evalSequence(proc.body, makeExtEnv(vars, args, proc.env));
 }
 
+const printPreTrace = (name: string, vals: Value[], counter: number): void =>
+    console.log(`>${" >".repeat(counter)} (${name} ${map(valueToString, vals)})`)
+
+const printPostTrace = (val: Value, counter: number): void =>
+    console.log(`<${" <".repeat(counter)} ${val}`)
+
 const applyTracedClosure = (proc: TracedClosure, args: Value[]): Result<Value> => {
     // complete this
 
+
+    printPreTrace(proc.name,args,unbox(proc.counter));
     setBox(proc.counter,unbox(proc.counter)+1);
-    console.log("> ".repeat(unbox(proc.counter)) +"(" + proc.name + " " + map(valueToString,args) + ")" );
     const res : Result<Value>=applyClosure(proc.closure,args);
-    isOk(res) ? console.log("< ".repeat(unbox(proc.counter)) + valueToString(res.value)) : makeFailure ( " function call not good ");
     setBox(proc.counter,unbox(proc.counter)-1);
+    isOk(res) ? printPostTrace(res.value,unbox(proc.counter)): makeFailure ( " function call not good ");
+
     return res;
 }
 
